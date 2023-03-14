@@ -62,7 +62,7 @@ services:
       timeout: 5s
       retries: 120
 
-  es01:
+  es01: # fqdn que apunta a este contenedor
     depends_on:
       setup:
         condition: service_healthy
@@ -73,10 +73,10 @@ services:
     ports:
       - ${ES_PORT}:9200
     environment:
-      - node.name=es01
+      - node.name=es01  # nombre interno al cluster
       - cluster.name=${CLUSTER_NAME}
-      - cluster.initial_master_nodes=es01,es02,es03
-      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03 # Nombres de nodos en ES
+      - discovery.seed_hosts=es02,es03 # IP fqdn # Nombres de red de los maestros
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - bootstrap.memory_lock=true
       - xpack.security.enabled=true
@@ -199,7 +199,7 @@ services:
       - ${KIBANA_PORT}:5601
     environment:
       - SERVERNAME=kibana
-      - ELASTICSEARCH_HOSTS=https://es01:9200
+      - ELASTICSEARCH_HOSTS=https://es01:9200 # Aqui habría que poner un balanceador
       - ELASTICSEARCH_USERNAME=kibana_system
       - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
       - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt

@@ -290,3 +290,40 @@ USOS DE LOS VOLUMENES AL TRABAJAR CON CONTENEDORES:
 - Persistencia de datos tras el borrado de un contenedor
 - Compartir datos entre contenedores
 - Inyectar ficheros de configuración
+
+
+---
+
+# Puertos
+
+ES: 
+- 9200 Este es el importante... Es al que tengo que apuntar para:
+    - Cargar datos
+    - Recuperar datos
+- 9300 Nos olvidamos... más que para abrirlo en un firewall si fuera necesario
+
+KIBANA: 
+- 5601 -> 8080
+
+--- 
+ElasticSearch
+
+No tiene interfaz gráfica.
+
+Solo ofrece un API HTTP REST
+curl 
+
+
+---
+
+https= http + TLS
+
+TLS: Ayuda a frustrar 2 tipos de ataques:
+- Man in the middle ... alguien que lee lo que mando por la red: ENCRIPCION
+- Suplantación de IDENTIDAD. El servidor debe presentar un certificado = Cuando nosotros presentamos un DNI
+                             El certificado viene AUTENTICADO (firmado) por una Entidad Certificadora
+                             Y yo en mi máquina tendré registradas una serie de entidades certificadoras.
+
+
+Cuando me conecto con un servidor, a través de un nombre de red o IP.
+
