@@ -1,0 +1,371 @@
+version: "2.2"
+
+services:
+  setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
+      - ./instances.yml:/usr/share/elasticsearch/config/certs/instances.yml
+    user: "0"
+    command: >
+      bash -c '
+        if [ x${ELASTIC_PASSWORD} == x ]; then
+          echo "Set the ELASTIC_PASSWORD environment variable in the .env file";
+          exit 1;
+        elif [ x${KIBANA_PASSWORD} == x ]; then
+          echo "Set the KIBANA_PASSWORD environment variable in the .env file";
+          exit 1;
+        fi;
+        if [ ! -f config/certs/ca.zip ]; then
+          echo "Creating CA";
+          bin/elasticsearch-certutil ca --silent --pem -out config/certs/ca.zip;
+          unzip config/certs/ca.zip -d config/certs;
+        fi;
+        if [ ! -f config/certs/certs.zip ]; then
+          echo "Creating certs";
+          bin/elasticsearch-certutil cert --silent --pem -out config/certs/certs.zip --in config/certs/instances.yml --ca-cert config/certs/ca/ca.crt --ca-key config/certs/ca/ca.key;
+          unzip config/certs/certs.zip -d config/certs;
+        fi;
+        echo "Setting file permissions"
+        chown -R root:root config/certs;
+        find . -type d -exec chmod 750 \{\} \;;
+        find . -type f -exec chmod 640 \{\} \;;
+        echo "Waiting for Elasticsearch availability";
+        until curl -s --cacert config/certs/ca/ca.crt https://maestro1:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
+        echo "Setting kibana_system password";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://maestro1:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "All done!";
+      '
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f config/certs/maestro1/maestro1.crt ]"]
+      interval: 1s
+      timeout: 5s
+      retries: 120
+
+  maestro1: # fqdn que apunta a este contenedor
+    depends_on:
+      setup:
+        condition: service_healthy
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
+      - /home/ubuntu/environment/datos/maestro1:/usr/share/elasticsearch/data
+    environment:
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      node.roles: master
+      node.name: maestro1  # nombre interno al cluster
+      cluster.name: ${CLUSTER_NAME}
+      cluster.initial_master_nodes: maestro1, maestro2 # Nombres de nodos en ES
+      discovery.seed_hosts: maestro2 # IP fqdn # Nombres de red de los maestros
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      bootstrap.memory_lock: "true"
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "true"
+      xpack.security.http.ssl.key: certs/maestro1/maestro1.key
+      xpack.security.http.ssl.certificate: certs/maestro1/maestro1.crt
+      xpack.security.http.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.enabled: "true"
+      xpack.security.transport.ssl.key: certs/maestro1/maestro1.key
+      xpack.security.transport.ssl.certificate: certs/maestro1/maestro1.crt
+      xpack.security.transport.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.license.self_generated.type: ${LICENSE}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+
+  maestro2: # fqdn que apunta a este contenedor
+    depends_on:
+      setup:
+        condition: service_healthy
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
+      - /home/ubuntu/environment/datos/maestro2:/usr/share/elasticsearch/data
+    environment:
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      node.roles: master
+      node.name: maestro2  # nombre interno al cluster
+      cluster.name: ${CLUSTER_NAME}
+      cluster.initial_master_nodes: maestro1, maestro2 # Nombres de nodos en ES
+      discovery.seed_hosts: maestro1 # IP fqdn # Nombres de red de los maestros
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      bootstrap.memory_lock: "true"
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "true"
+      xpack.security.http.ssl.key: certs/maestro2/maestro2.key
+      xpack.security.http.ssl.certificate: certs/maestro2/maestro2.crt
+      xpack.security.http.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.enabled: "true"
+      xpack.security.transport.ssl.key: certs/maestro2/maestro2.key
+      xpack.security.transport.ssl.certificate: certs/maestro2/maestro2.crt
+      xpack.security.transport.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.license.self_generated.type: ${LICENSE}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+
+  datos1: # fqdn que apunta a este contenedor
+    depends_on:
+      setup:
+        condition: service_healthy
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
+      - /home/ubuntu/environment/datos/datos1:/usr/share/elasticsearch/data
+    environment:
+      ES_JAVA_OPTS: -Xms2g -Xmx2g
+      node.roles: data,master,voting_only
+      node.name: datos1  # nombre interno al cluster
+      cluster.name: ${CLUSTER_NAME}
+      discovery.seed_hosts: maestro1, maestro2
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      bootstrap.memory_lock: "true"
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "true"
+      xpack.security.http.ssl.key: certs/datos1/datos1.key
+      xpack.security.http.ssl.certificate: certs/datos1/datos1.crt
+      xpack.security.http.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.enabled: "true"
+      xpack.security.transport.ssl.key: certs/datos1/datos1.key
+      xpack.security.transport.ssl.certificate: certs/datos1/datos1.crt
+      xpack.security.transport.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.license.self_generated.type: ${LICENSE}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+
+  datos2: # fqdn que apunta a este contenedor
+    depends_on:
+      setup:
+        condition: service_healthy
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
+      - /home/ubuntu/environment/datos/datos2:/usr/share/elasticsearch/data
+    environment:
+      ES_JAVA_OPTS: -Xms2g -Xmx2g
+      node.roles: data
+      node.name: datos2  # nombre interno al cluster
+      cluster.name: ${CLUSTER_NAME}
+      discovery.seed_hosts: maestro1, maestro2
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      bootstrap.memory_lock: "true"
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "true"
+      xpack.security.http.ssl.key: certs/datos2/datos2.key
+      xpack.security.http.ssl.certificate: certs/datos2/datos2.crt
+      xpack.security.http.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.enabled: "true"
+      xpack.security.transport.ssl.key: certs/datos2/datos2.key
+      xpack.security.transport.ssl.certificate: certs/datos2/datos2.crt
+      xpack.security.transport.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.license.self_generated.type: ${LICENSE}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+
+  datos3: # fqdn que apunta a este contenedor
+    depends_on:
+      setup:
+        condition: service_healthy
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
+      - /home/ubuntu/environment/datos/datos3:/usr/share/elasticsearch/data
+    environment:
+      ES_JAVA_OPTS: -Xms2g -Xmx2g
+      node.roles: data
+      node.name: datos3  # nombre interno al cluster
+      cluster.name: ${CLUSTER_NAME}
+      discovery.seed_hosts: maestro1, maestro2
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      bootstrap.memory_lock: "true"
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "true"
+      xpack.security.http.ssl.key: certs/datos3/datos3.key
+      xpack.security.http.ssl.certificate: certs/datos3/datos3.crt
+      xpack.security.http.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.enabled: "true"
+      xpack.security.transport.ssl.key: certs/datos3/datos3.key
+      xpack.security.transport.ssl.certificate: certs/datos3/datos3.crt
+      xpack.security.transport.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.license.self_generated.type: ${LICENSE}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+      
+
+  coordinador1: # fqdn que apunta a este contenedor
+    depends_on:
+      setup:
+        condition: service_healthy
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
+      - /home/ubuntu/environment/datos/coordinador1:/usr/share/elasticsearch/data
+    ports:
+      - ${ES_PORT}:9200
+    environment:
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      node.name: coordinador1  # nombre interno al cluster
+      node.roles: "[]"
+      cluster.name: ${CLUSTER_NAME}
+      discovery.seed_hosts: maestro1, maestro2
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      bootstrap.memory_lock: "true"
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "true"
+      xpack.security.http.ssl.key: certs/coordinador1/coordinador1.key
+      xpack.security.http.ssl.certificate: certs/coordinador1/coordinador1.crt
+      xpack.security.http.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.enabled: "true"
+      xpack.security.transport.ssl.key: certs/coordinador1/coordinador1.key
+      xpack.security.transport.ssl.certificate: certs/coordinador1/coordinador1.crt
+      xpack.security.transport.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.license.self_generated.type: ${LICENSE}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120      
+
+
+  coordinador2: # fqdn que apunta a este contenedor
+    depends_on:
+      setup:
+        condition: service_healthy
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
+      - /home/ubuntu/environment/datos/coordinador2:/usr/share/elasticsearch/data
+    ports:
+      - ${ES_PORT_2}:9200
+    environment:
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      node.name: coordinador2  # nombre interno al cluster
+      node.roles: "[]"
+      cluster.name: ${CLUSTER_NAME}
+      discovery.seed_hosts: maestro1, maestro2
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      bootstrap.memory_lock: "true"
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "true"
+      xpack.security.http.ssl.key: certs/coordinador2/coordinador2.key
+      xpack.security.http.ssl.certificate: certs/coordinador2/coordinador2.crt
+      xpack.security.http.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.enabled: "true"
+      xpack.security.transport.ssl.key: certs/coordinador2/coordinador2.key
+      xpack.security.transport.ssl.certificate: certs/coordinador2/coordinador2.crt
+      xpack.security.transport.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.license.self_generated.type: ${LICENSE}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120      
+      
+      
+  kibana:
+    depends_on:
+      coordinador1:
+        condition: service_healthy
+      coordinador2:
+        condition: service_healthy
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    volumes:
+      - /home/ubuntu/environment/datos/certificados:/usr/share/kibana/config/certs
+      - /home/ubuntu/environment/datos/kibana:/usr/share/kibana/data
+    ports:
+      - ${KIBANA_PORT}:5601
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=["https://coordinador1:9200","https://coordinador2:9200"] # Aqui habría que poner un balanceador
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
