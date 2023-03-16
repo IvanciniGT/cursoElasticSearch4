@@ -7,3 +7,17 @@ services:
         image:          httpd:latest
         ports:
             - 8081:80
+        volumes:
+            - /home/ubuntu/environment/datos/apache1/logs:/tmp/logs  # Le creamos para tener acceso al fichero de log de apache
+            - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf        # Le creamos para inyectar nuestro nuevo fichero de log al apache
+    
+    filebeat1:
+        container_name: filebeat1
+        image:          docker.elastic.co/beats/filebeat:8.6.2
+        volumes:
+            - /home/ubuntu/environment/datos/apache1/logs:/tmp/logs  # Le creamos para tener acceso al fichero de log de apache
+            - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+
+    logstash: # Este nombre me permite acceder a esa maquina(contenedor) en red
+        container_name: logstash
+        image:          docker.elastic.co/logstash/logstash:8.6.2

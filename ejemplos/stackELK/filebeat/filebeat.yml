@@ -1,0 +1,13 @@
+filebeat.inputs:
+    -   type: log  #filestream
+        #id: log-apache
+        paths:
+            -   /tmp/logs/access_log
+            
+# Aqui le podría pedir que hiciera algunas transformaciones/filtros sobre los datos...
+# Querré meter aqui tansformaciones? NO -> Logstash
+
+# Si acaso algún filtro... pero por evitar mucho uso de red
+            
+outputs.logstash:
+    hosts: [ "logstash:5045" ]
