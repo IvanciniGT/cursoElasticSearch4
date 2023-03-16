@@ -137,7 +137,7 @@ services:
       - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
       - /home/ubuntu/environment/datos/datos1:/usr/share/elasticsearch/data
     environment:
-      ES_JAVA_OPTS: -Xms2g -Xmx2g
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
       node.roles: data,master,voting_only
       node.name: datos1  # nombre interno al cluster
       cluster.name: ${CLUSTER_NAME}
@@ -179,7 +179,7 @@ services:
       - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
       - /home/ubuntu/environment/datos/datos2:/usr/share/elasticsearch/data
     environment:
-      ES_JAVA_OPTS: -Xms2g -Xmx2g
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
       node.roles: data
       node.name: datos2  # nombre interno al cluster
       cluster.name: ${CLUSTER_NAME}
@@ -221,7 +221,7 @@ services:
       - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
       - /home/ubuntu/environment/datos/datos3:/usr/share/elasticsearch/data
     environment:
-      ES_JAVA_OPTS: -Xms2g -Xmx2g
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
       node.roles: data
       node.name: datos3  # nombre interno al cluster
       cluster.name: ${CLUSTER_NAME}
