@@ -1,0 +1,141 @@
+# Click the Variables button, above, to create your own variables.
+GET /_cat/shards
+
+GET /_cat/health
+
+GET /.geoip_databases
+
+GET /indice1
+
+PUT /indice1
+
+POST /indice1/_doc
+{
+  "nombre": "Ivan",
+  "edad": 44
+}
+
+POST /indice1/_doc/1
+{
+  "nombre": "Lucas",
+  "edad": 25
+}
+
+
+POST /indice1/_doc/3
+{
+  "nombre": "Felipe",
+  "edad": 34
+}
+
+GET /indice*/_search
+
+GET /indice2
+
+POST /cacahuete/_doc
+{
+  "nombre": "Ivan",
+  "edad": 44
+}
+
+POST /log_apache_enero_2022/_doc/1
+{
+  "url": "http://miwebserver/bienvenida.html",
+  "ip": "192.168.1.100",
+  "bytes": 365,
+  "status": 200
+}
+
+
+GET /log_apache_enero_2022
+
+GET /log_apache_enero_2022/_search
+{
+  "query": {
+    "term": {
+      "ip": "192.168.1.0/24"
+    }
+  }
+}
+
+PUT /log_apache_febrero_2023
+{
+  "mappings":{
+    "properties": {
+      "ip": {
+        "type": "ip"
+      },
+      "status": {
+        "type": "long"
+      }
+    }
+  }
+}
+
+GET /log_apache_febrero_2023
+
+
+POST /log_apache_febrero_2023/_doc/1
+{
+  "url": "http://miwebserver/bienvenida.html",
+  "ip": "192.168.1.100",
+  "bytes": 365,
+  "status": "200"
+}
+
+
+GET /log_apache_febrero_2023/_search
+
+GET /log_apache_febrero_2023/_search
+{
+  "query": {
+    "term": {
+      "ip": "192.168.1.0/24"
+    }
+  }
+}
+
+
+PUT /log_apache_abril_2023
+{
+  "mappings":{
+    "properties": {
+      "ip": {
+        "type": "ip"
+      },
+      "status": {
+        "type": "long"
+      }
+    }
+  },
+  "settings": {
+    "index": {
+      "number_of_shards": 10,
+      "number_of_replicas": 3
+    }
+  }
+}
+
+PUT /log_apache_abril_2023/_settings
+{
+    "index": {
+      "number_of_replicas": 2
+    }
+}
+
+
+POST /log_apache_marzo_2023/_open
+POST /log_apache_marzo_2023/_close
+
+GET /log_apache_marzo_2023/_search
+
+
+
+
+
+
+
+
+
+
+

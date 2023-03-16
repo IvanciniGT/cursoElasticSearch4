@@ -1,0 +1,9 @@
+version: "2"
+
+services:
+    
+    apache1:
+        container_name: apache1
+        image:          httpd:latest
+        ports:
+            - 8081:80
