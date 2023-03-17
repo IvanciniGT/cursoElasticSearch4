@@ -24,3 +24,4 @@ services:
         volumes:
             - ./logstash/logstash-apache-log.conf:/usr/share/logstash/pipeline/logstash-apache-log.conf
             - /home/ubuntu/environment/datos/certificados/ca/ca.crt:/usr/share/logstash/certs/ca/ca.crt
+            - ./logstash/indice-apache.json:/usr/share/logstash/templates/template.json
