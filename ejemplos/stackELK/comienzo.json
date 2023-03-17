@@ -1,0 +1,97 @@
+{
+      "@version" => "1",
+       "message" => "47.61.49.162 - - [16/Mar/2023:12:05:20 +0000] \"GET / HTTP/1.1\" 304 - \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36\"",
+         "agent" => {
+        "ephemeral_id" => "adb16061-6dbd-4988-a4ee-b12f8949f7a0",
+             "version" => "8.6.2",
+                "type" => "filebeat",
+                  "id" => "1c79ceb1-9179-4a16-9d71-206542c399da",
+                "name" => "6f46a438e181"
+    },
+          "tags" => [
+        [0] "beats_input_codec_plain_applied"
+    ],
+    "@timestamp" => 2023-03-17T09:07:08.074Z,
+         "event" => {
+        "original" => "47.61.49.162 - - [16/Mar/2023:12:05:20 +0000] \"GET / HTTP/1.1\" 304 - \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36\""
+    },
+           "log" => {
+          "file" => {
+            "path" => "/tmp/logs/access_log"
+        },
+        "offset" => 1737
+    },
+          "host" => {
+        "name" => "6f46a438e181"
+    },
+           "ecs" => {
+        "version" => "8.0.0"
+    },
+         "input" => {
+        "type" => "log"
+    },
+    
+    
+    {
+  "request": "/",
+  "referrer": "\"-\"",
+  "agent": "\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36\"",
+  "auth": "-",
+  "ident": "-",
+  "response": "304",
+  "clientip": "47.61.49.162",
+  "verb": "GET",
+  "httpversion": "1.1",
+  "timestamp": "16/Mar/2023:12:05:17 +0000"
+}
+    
+}
+
+
+47.61.49.162 - - [16/Mar/2023:12:05:20 +0000] "GET / HTTP/1.1" 304 - "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+
+LINEA ORIGINAL : 200 bytes
+JSON: 1200
+
+-> ES
+1 primario
+2 replicas
+
+3600 x 1.5 = 5000 bytes = 5kbs
+
+Pero no va a ser así... Va a ser MUUUUUCHO MAS 
+
+Estoy multiplicando x 25
+
+----
+{
+    "@timestamp" => 2023-03-17T10:42:33.000Z,
+       "message" => "165.225.92.223 - - [17/Mar/2023:10:42:33 +0000] \"-\" 408 - \"-\" \"-\"",
+          "tags" => [
+        [0] "beats_input_codec_plain_applied"
+    ],
+        "source" => {
+        "address" => "165.225.92.223"
+    },
+          "host" => {
+        "name" => "4d3d07f947fc"
+    },
+    ,
+          "http" => {
+        "response" => {
+            "status_code" => 408
+        }
+    },
+           "log" => {
+          "file" => {
+            "path" => "/tmp/logs/access_log"
+        },
+        "offset" => 37876
+    }
+}
+
+300 documentos 200 bytes = 60000 bytes = 60k
+                                         375.18kb
+                                         x 6. x 12
+                                         
+                                         1 replica
