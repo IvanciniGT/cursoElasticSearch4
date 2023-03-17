@@ -21,3 +21,6 @@ services:
     logstash: # Este nombre me permite acceder a esa maquina(contenedor) en red
         container_name: logstash
         image:          docker.elastic.co/logstash/logstash:8.6.2
+        volumes:
+            - ./logstash/logstash-apache-log.conf:/usr/share/logstash/pipeline/logstash-apache-log.conf
+            - /home/ubuntu/environment/datos/certificados/ca/ca.crt:/usr/share/logstash/certs/ca/ca.crt

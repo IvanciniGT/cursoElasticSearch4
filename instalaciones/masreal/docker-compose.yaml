@@ -28,8 +28,8 @@ services:
         fi;
         echo "Setting file permissions"
         chown -R root:root config/certs;
-        find . -type d -exec chmod 750 \{\} \;;
-        find . -type f -exec chmod 640 \{\} \;;
+        find . -type d -exec chmod 755 \{\} \;;
+        find . -type f -exec chmod 666 \{\} \;;
         echo "Waiting for Elasticsearch availability";
         until curl -s --cacert config/certs/ca/ca.crt https://maestro1:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
         echo "Setting kibana_system password";
@@ -51,7 +51,7 @@ services:
       - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
       - /home/ubuntu/environment/datos/maestro1:/usr/share/elasticsearch/data
     environment:
-      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      ES_JAVA_OPTS: -Xms700m -Xmx700m
       node.roles: master
       node.name: maestro1  # nombre interno al cluster
       cluster.name: ${CLUSTER_NAME}
@@ -94,7 +94,7 @@ services:
       - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
       - /home/ubuntu/environment/datos/maestro2:/usr/share/elasticsearch/data
     environment:
-      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      ES_JAVA_OPTS: -Xms700m -Xmx700m
       node.roles: master
       node.name: maestro2  # nombre interno al cluster
       cluster.name: ${CLUSTER_NAME}
@@ -137,7 +137,7 @@ services:
       - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
       - /home/ubuntu/environment/datos/datos1:/usr/share/elasticsearch/data
     environment:
-      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      ES_JAVA_OPTS: -Xms700m -Xmx700m
       node.roles: data,master,voting_only
       node.name: datos1  # nombre interno al cluster
       cluster.name: ${CLUSTER_NAME}
@@ -179,7 +179,7 @@ services:
       - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
       - /home/ubuntu/environment/datos/datos2:/usr/share/elasticsearch/data
     environment:
-      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      ES_JAVA_OPTS: -Xms700m -Xmx700m
       node.roles: data
       node.name: datos2  # nombre interno al cluster
       cluster.name: ${CLUSTER_NAME}
@@ -221,7 +221,7 @@ services:
       - /home/ubuntu/environment/datos/certificados:/usr/share/elasticsearch/config/certs
       - /home/ubuntu/environment/datos/datos3:/usr/share/elasticsearch/data
     environment:
-      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      ES_JAVA_OPTS: -Xms700m -Xmx700m
       node.roles: data
       node.name: datos3  # nombre interno al cluster
       cluster.name: ${CLUSTER_NAME}
@@ -265,7 +265,7 @@ services:
     ports:
       - ${ES_PORT}:9200
     environment:
-      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      ES_JAVA_OPTS: -Xms700m -Xmx700m
       node.name: coordinador1  # nombre interno al cluster
       node.roles: "[]"
       cluster.name: ${CLUSTER_NAME}
@@ -309,7 +309,7 @@ services:
     ports:
       - ${ES_PORT_2}:9200
     environment:
-      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      ES_JAVA_OPTS: -Xms700m -Xmx700m
       node.name: coordinador2  # nombre interno al cluster
       node.roles: "[]"
       cluster.name: ${CLUSTER_NAME}

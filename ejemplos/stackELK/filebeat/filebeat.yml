@@ -9,5 +9,5 @@ filebeat.inputs:
 
 # Si acaso algún filtro... pero por evitar mucho uso de red
             
-outputs.logstash:
+output.logstash:
     hosts: [ "logstash:5045" ]
