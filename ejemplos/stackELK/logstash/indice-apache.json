@@ -1,43 +1,20 @@
 {
   "index_patterns": ["webserver-*"],
-  "settings": {
-    "index": {
-      "number_of_shards": 4,
-      "number_of_replicas": 2
-    }
-  },
-  "mappings": {
-    "properties": {
-      "@timestamp": {
-        "type": "date"
-      },
-      "host": {
-        "properties": {
-          "name": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          }
+  "template": {
+      "settings": {
+        "index": {
+          "number_of_shards": 4,
+          "number_of_replicas": 2
         }
       },
-      "http": {
+      "mappings": {
         "properties": {
-          "request": {
+          "@timestamp": {
+            "type": "date"
+          },
+          "host": {
             "properties": {
-              "method": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
-                }
-              },
-              "referrer": {
+              "name": {
                 "type": "text",
                 "fields": {
                   "keyword": {
@@ -48,36 +25,45 @@
               }
             }
           },
-          "response": {
+          "http": {
             "properties": {
-              "body": {
+              "request": {
                 "properties": {
-                  "bytes": {
+                  "method": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "referrer": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              },
+              "response": {
+                "properties": {
+                  "body": {
+                    "properties": {
+                      "bytes": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "status_code": {
                     "type": "long"
                   }
                 }
               },
-              "status_code": {
-                "type": "long"
-              }
-            }
-          },
-          "version": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          }
-        }
-      },
-      "log": {
-        "properties": {
-          "file": {
-            "properties": {
-              "path": {
+              "version": {
                 "type": "text",
                 "fields": {
                   "keyword": {
@@ -88,39 +74,27 @@
               }
             }
           },
-          "offset": {
-            "type": "long"
-          }
-        }
-      },
-      "message": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
-      },
-      "source": {
-        "properties": {
-          "address": {
-            "type": "ip"
-          }
-        }
-      },
-      "tags": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
-      },
-      "url": {
-        "properties": {
-          "original": {
+          "log": {
+            "properties": {
+              "file": {
+                "properties": {
+                  "path": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              },
+              "offset": {
+                "type": "long"
+              }
+            }
+          },
+          "message": {
             "type": "text",
             "fields": {
               "keyword": {
@@ -128,23 +102,50 @@
                 "ignore_above": 256
               }
             }
-          }
-        }
-      },
-      "user_agent": {
-        "properties": {
-          "original": {
+          },
+          "source": {
+            "properties": {
+              "address": {
+                "type": "ip"
+              }
+            }
+          },
+          "tags": {
             "type": "text",
             "fields": {
               "keyword": {
                 "type": "keyword",
                 "ignore_above": 256
+              }
+            }
+          },
+          "url": {
+            "properties": {
+              "original": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              }
+            }
+          },
+          "user_agent": {
+            "properties": {
+              "original": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
               }
             }
           }
         }
       }
     }
-  }
 }
-
