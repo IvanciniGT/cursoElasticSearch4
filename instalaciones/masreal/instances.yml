@@ -1,0 +1,55 @@
+instances:
+
+-   name: maestro1 # 1
+    dns:
+        - maestro1
+        - localhost
+    ip:
+        - 127.0.0.1
+    
+-   name: maestro2 # 1
+    dns:
+        - maestro2
+        - localhost
+    ip:
+        - 127.0.0.1
+    
+
+-   name: datos1 # 2
+    dns:
+        - datos1
+        - localhost
+    ip:
+        - 127.0.0.1
+    
+-   name: datos2 # 2
+    dns:
+        - datos2
+        - localhost
+    ip:
+        - 127.0.0.1
+    
+-   name: datos3 # 2
+    dns:
+        - datos3
+        - localhost
+    ip:
+        - 127.0.0.1
+    
+-   name: coordinador1 # 1
+    dns:
+        - coordinador1
+        - localhost
+    ip:
+        - 127.0.0.1
+        - 172.31.12.218
+    
+
+-   name: coordinador2 # 1
+    dns:
+        - coordinador2
+        - localhost
+    ip:
+        - 127.0.0.1
+        - 172.31.12.218
+    
